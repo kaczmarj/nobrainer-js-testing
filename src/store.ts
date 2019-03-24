@@ -27,7 +27,7 @@ export default new Vuex.Store({
         }
       }
     },
-    SET_PREDICTED_VOLUME(state, data: Uint8Array) {
+    SET_PREDICTIONS_ARRAY(state, data: Uint8Array) {
       state.predictionsArray = data;
     },
   },

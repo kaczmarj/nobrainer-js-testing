@@ -30,7 +30,7 @@ export default class Predict extends Vue {
 
     const predictions = predict('path/to/model.json', features, shape);
 
-    this.$store.commit('SET_PREDICTED_VOLUME', predictions);
+    this.$store.commit('SET_PREDICTIONS_ARRAY', predictions);
   }
 }
 </script>
