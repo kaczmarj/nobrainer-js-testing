@@ -16,9 +16,11 @@
     "vuex": "^3.0.1"
   },
   "devDependencies": {
+    "@types/pako": "^1.0.1",
     "@vue/cli-plugin-typescript": "^3.5.0",
     "@vue/cli-service": "^3.5.0",
     "clang-format": "^1.2.4",
+    "pako": "^1.0.10",
     "tslint": "^5.14.0",
     "typescript": "^3.2.1",
     "vue-template-compiler": "^2.5.21"
