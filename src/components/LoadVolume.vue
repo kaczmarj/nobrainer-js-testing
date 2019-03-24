@@ -1,14 +1,21 @@
 <template>
-  <div class="hello"></div>
+  <div>
+    <h2>Load nifti file</h2>
+    <label>
+      <input type="file" @change="loadVolumeFileArrayBuffer">
+    </label>
+  </div>
 </template>
 
 <script lang="ts">
 import * as nifti from 'nifti/src';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 
 @Component
 export default class LoadVolume extends Vue {
-  @Prop() private msg!: string;
+  public loadVolumeFileArrayBuffer(event: Event) {
+    this.$store.commit('SET_VOLUME_FILE_ARRAY_BUFFER', event);
+  }
 }
 </script>
 
