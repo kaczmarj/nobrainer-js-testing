@@ -13,50 +13,36 @@ set -e
 
 git submodule update --init --recursive
 
-echo "+++"
-echo "+++ setting up links"
-echo "+++"
-cd tfjs-core
-yalc publish
-cd ../tfjs-layers
-yalc link @tensorflow/tfjs-core
-cd ../tfjs-converter
-yalc link @tensorflow/tfjs-core @tensorflow/tfjs-layers
-cd ../tfjs
-yalc link @tensorflow/tfjs-core @tensorflow/tfjs-layers @tensorflow/tfjs-converter
-cd ..
-
 echo "++++++++++++++++++++++++++++++++"
 echo "++ Publishing local tfjs-core ++"
 echo "++++++++++++++++++++++++++++++++"
 cd tfjs-core
 yarn
 yarn publish-local
-yalc push
 
 echo "++++++++++++++++++++++++++++++++++"
 echo "++ Publishing local tfjs-layers ++"
 echo "++++++++++++++++++++++++++++++++++"
 cd ../tfjs-layers
 yarn
+yarn link-local @tensorflow/tfjs-core
 yarn publish-local
-yalc push
 
 echo "+++++++++++++++++++++++++++++++++++++"
 echo "++ Publishing local tfjs-converter ++"
 echo "+++++++++++++++++++++++++++++++++++++"
 cd ../tfjs-converter
 yarn
+yarn link-local @tensorflow/tfjs-core @tensorflow/tfjs-layers
 yarn publish-local
-yalc push
 
 echo "+++++++++++++++++++++++++++"
 echo "++ Publishing local tfjs ++"
 echo "+++++++++++++++++++++++++++"
 cd ../tfjs
 yarn
+yarn link-local @tensorflow/tfjs-core @tensorflow/tfjs-layers @tensorflow/tfjs-converter
 yarn publish-local
-yalc push
 
 echo "+++++++++++++++++++++++++++++++"
 echo "++ Publishing local nifti-ts ++"
@@ -65,10 +51,16 @@ cd ../nifti-ts
 yarn
 yalc push
 
-echo "++++++++++++++++++++++++++++++++"
-echo "++ Updating all local modules ++"
-echo "++++++++++++++++++++++++++++++++"
+echo "+++++++++++++++++++++++++++++++++++++++++++"
+echo "++ Linking local modules to nobrainer-js ++"
+echo "+++++++++++++++++++++++++++++++++++++++++++"
 cd ..
-yalc update
+
+yalc link \
+  @tensorflow/tfjs-core \
+  @tensorflow/tfjs-layers \
+  @tensorflow/tfjs-converter \
+  @tensorflow/tfjs \
+  nifti
 
 echo "++ Finished. ++"
