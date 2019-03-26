@@ -1,6 +1,7 @@
 <template>
   <div>
     <h2>Predict</h2>
+    <input v-model="modelURL">
     <a href="#" @click="predictOnVolume">Predict</a>
   </div>
 </template>
@@ -13,7 +14,11 @@ import { Component, Vue } from 'vue-property-decorator';
 @Component
 export default class Predict extends Vue {
 
-  public predictOnVolume() {
+  public data() {
+    return {modelURL: ''};
+  }
+
+  public async predictOnVolume() {
     const featuresNifti: nifti.Image = this.$store.getters.featuresNifti;
 
     const rank = featuresNifti.header.dim[0];
@@ -28,7 +33,7 @@ export default class Predict extends Vue {
       features = new Float32Array(features);
     }
 
-    const predictions = predict('path/to/model.json', features, shape);
+    const predictions = await predict(this.$data.modelURL, features, shape);
 
     this.$store.commit('SET_PREDICTIONS_ARRAY', predictions);
   }
