@@ -1,0 +1,20 @@
+[submodule "tfjs-core"]
+	path = tfjs-core
+	url = https://github.com/kaczmarj/tfjs-core.git
+	branch = nobrainer-js
+[submodule "tfjs-layers"]
+	path = tfjs-layers
+	url = https://github.com/kaczmarj/tfjs-layers.git
+	branch = nobrainer-js
+[submodule "tfjs-converter"]
+	path = tfjs-converter
+	url = https://github.com/kaczmarj/tfjs-converter.git
+	branch = nobrainer-js
+[submodule "tfjs"]
+	path = tfjs
+	url = https://github.com/tensorflow/tfjs.git
+	branch = master
+[submodule "nifti-ts"]
+	path = nifti-ts
+	url = https://github.com/kaczmarj/nifti-ts.git
+	branch = dev
