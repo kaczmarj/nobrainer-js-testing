@@ -2,6 +2,8 @@
 
 import * as tf from '@tensorflow/tfjs';
 
+tf.conv3d;
+
 function standardScore<T extends tf.Tensor>(x: T): T {
   return tf.tidy(() => {
     const mean = tf.mean(x);
