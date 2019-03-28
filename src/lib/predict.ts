@@ -37,7 +37,7 @@ function toBlocks(
 function fromBlocks(
     x: tf.Tensor4D, outputShape: [number, number, number]): tf.Tensor3D {
   return tf.tidy(() => {
-    if (x.rank !== 3) {
+    if (x.rank !== 4) {
       throw Error(`Expected rank-4 tensor`);
     }
     const nBlocks = x.shape[0];
@@ -49,9 +49,9 @@ function fromBlocks(
   });
 }
 
-function getHardClasses<T extends tf.Tensor>(x: T): T {
+function getHardClasses(x: tf.Tensor<tf.Rank.R5>): tf.Tensor4D {
   return tf.tidy(() => {
-    if (x.shape[-1] === 1) {  // binary
+    if (x.shape[4] === 1) {  // binary
       const threshold = 0.3;
       return x.squeeze([-1]).greater(threshold).cast('int32');
     } else {  // multiclass
@@ -64,7 +64,7 @@ export async function predict(
     modelPath: string, features: Float32Array,
     shape: [number, number, number]): Promise<Uint8Array> {
   const featuresT = tf.tensor3d(features, shape);
-  const blockShape: [number, number, number] = [128, 128, 128];
+  const blockShape: [number, number, number] = [32, 32, 32];
   // Take non-overlapping blocks and add grayscale channel.
 
   console.log(`have features of shape ${featuresT.shape}`);
@@ -72,22 +72,35 @@ export async function predict(
   console.log(`have features blocks of shape ${featuresBlocks.shape}`);
   console.log(`standard scoring features blocks`);
   featuresBlocks = standardScore(featuresBlocks);
+  const nBlocks = featuresBlocks.shape[0];
 
-  const originalBackend = tf.getBackend();
-  console.log(`using backend ${originalBackend}`);
+  console.log(`using backend ${tf.getBackend()}`);
 
   console.log(`loading model async`);
-  const model = await tf.loadGraphModel(modelPath);
+  const model = await tf.loadLayersModel(modelPath);
 
-  const now = Date();
-  console.log(`prediction started at ${now}`);
-  const predictions =
-      model.predict(featuresBlocks, {batchSize: 1, verbose: true}) as tf.Tensor;
+  console.log(`model output shape: ${model.outputShape}`);
 
-  const nownow = Date();
-  console.log(`finished predicting at ${nownow}`);
+  console.log(`prediction started at ${Date()}`);
+  // const predictions =
+  //     await model.predict(featuresBlocks, {batchSize: 1, verbose: true}) as
+  //     tf.Tensor<tf.Rank.R5>;
+  const predictionsArray = new Array(nBlocks).fill(0);
 
-  const labels4d = getHardClasses(predictions) as tf.Tensor4D;
+  for (const i of Array.from(Array(nBlocks).keys())) {
+    const thisy =
+        model.predict(featuresBlocks.slice(i, 1)) as tf.Tensor<tf.Rank.R5>;
+    predictionsArray[i] = thisy;
+    console.log(`prediction round ${i}`);
+  }
+
+  const predictions = tf.concat(predictionsArray) as tf.Tensor<tf.Rank.R5>;
+
+  console.log(`finished predicting at ${Date()}`);
+
+  console.log(`shape: ${predictions.shape}`);
+
+  const labels4d = getHardClasses(predictions);
   console.log(`got hard classes`);
   const labels = fromBlocks(labels4d, shape);
   console.log(`got full volume of shape ${labels.shape}`);
