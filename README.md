@@ -31,3 +31,12 @@ yarn run lint
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Converting a model to tfjs
+
+```
+tensorflowjs_converter \
+  --input_format keras_saved_model \
+  --output_format tfjs_layers_model \
+  INPUT_DIR OUTPUT_DIR
+```
