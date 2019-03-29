@@ -11,7 +11,7 @@
 
 set -e
 
-git submodule update --init --recursive
+git submodule update --init --recursive --remote
 
 echo "++++++++++++++++++++++++++++++++"
 echo "++ Publishing local tfjs-core ++"

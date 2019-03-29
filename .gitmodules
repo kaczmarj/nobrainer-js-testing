@@ -12,8 +12,8 @@
 	branch = nobrainer-js
 [submodule "tfjs"]
 	path = tfjs
-	url = https://github.com/tensorflow/tfjs.git
-	branch = master
+	url = https://github.com/kaczmarj/tfjs.git
+	branch = nobrainer-js
 [submodule "nifti-ts"]
 	path = nifti-ts
 	url = https://github.com/kaczmarj/nifti-ts.git
