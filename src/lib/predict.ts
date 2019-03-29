@@ -43,7 +43,7 @@ function fromBlocks(
       throw Error(`Expected rank-4 tensor`);
     }
     const nBlocks = x.shape[0];
-    const ncbrt = nBlocks ** (1 / 3);
+    const ncbrt = Math.cbrt(nBlocks);
     const interShape =
         [ncbrt, ncbrt, ncbrt, x.shape[1], x.shape[2], x.shape[3]];
     const perm = [0, 3, 1, 4, 2, 5];
@@ -66,7 +66,7 @@ export async function predict(
     modelPath: string, features: Float32Array,
     shape: [number, number, number]): Promise<Uint8Array> {
   const featuresT = tf.tensor3d(features, shape);
-  const blockShape: [number, number, number] = [32, 32, 32];
+  const blockShape: [number, number, number] = [64, 64, 64];
   // Take non-overlapping blocks and add grayscale channel.
 
   console.log(`have features of shape ${featuresT.shape}`);
@@ -84,27 +84,31 @@ export async function predict(
   console.log(`model output shape: ${model.outputShape}`);
 
   console.log(`prediction started at ${Date()}`);
-  // const predictions =
-  //     await model.predict(featuresBlocks, {batchSize: 1, verbose: true}) as
-  //     tf.Tensor<tf.Rank.R5>;
+
   const predictionsArray = new Array(nBlocks).fill(0);
 
   for (const i of Array.from(Array(nBlocks).keys())) {
-    const thisy =
-        model.predict(featuresBlocks.slice(i, 1)) as tf.Tensor<tf.Rank.R5>;
-    predictionsArray[i] = thisy;
-    console.log(`prediction round ${i}`);
+    predictionsArray[i] = tf.tidy(() => {
+      const t =
+          model.predict(featuresBlocks.slice(i, 1)) as tf.Tensor<tf.Rank.R5>;
+      // This returns a Uint8Array. We get the hard classes with each
+      // iteration to reduce memory usage.
+      return getHardClasses(t).dataSync();
+    });
+    console.log(`${i + 1} of ${nBlocks}`);
   }
-
-  const predictions = tf.concat(predictionsArray) as tf.Tensor<tf.Rank.R5>;
-
   console.log(`finished predicting at ${Date()}`);
 
-  console.log(`shape: ${predictions.shape}`);
+  const predictedBlocks = tf.concat(predictionsArray).reshape([
+    nBlocks,
+    blockShape[0],
+    blockShape[1],
+    blockShape[2],
+  ]) as tf.Tensor<tf.Rank.R4>;
 
-  const labels4d = getHardClasses(predictions);
-  console.log(`got hard classes`);
-  const labels = fromBlocks(labels4d, shape);
+  console.log(`shape of predicted blocks:: ${predictedBlocks.shape}`);
+
+  const labels = fromBlocks(predictedBlocks, shape);
   console.log(`got full volume of shape ${labels.shape}`);
 
   console.log(`loaded data from labels`);
